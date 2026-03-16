@@ -131,6 +131,69 @@ package "Core" {
 
 ### 1.3. Trang Bị Hao Mòn
 
+```plantuml
+@startuml
+left to right direction
+
+package "Core" {
+
+    interface Soldier {
+        +hit(): int
+        +wardOff(strength: int): boolean
+    }
+
+    class Infantryman <<ConcreteComponent>>
+    class Horseman <<ConcreteComponent>>
+
+    Soldier <|-- Infantryman
+    Soldier <|-- Horseman
+
+    abstract class SoldierBaseDecorator <<Decorator>> {
+        -wrappee: Soldier
+        +SoldierBaseDecorator(s: Soldier)
+        +hit(): int
+        +wardOff(strength: int): boolean
+    }
+
+    Soldier <|-- SoldierBaseDecorator
+    SoldierBaseDecorator *-- Soldier
+
+    class SoldierShieldDecorator <<ConcreteDecorator>> {
+        -durability: int
+        +SoldierShieldDecorator(s: Soldier)
+        +hit(): int
+        +wardOff(strength: int): boolean
+    }
+
+    SoldierBaseDecorator <|-- SoldierShieldDecorator
+
+    class SoldierSwordDecorator <<ConcreteDecorator>> {
+        -durability: int
+        +SoldierSwordDecorator(s: Soldier)
+        +hit(): int
+        +wardOff(strength: int): boolean
+    }
+
+    SoldierBaseDecorator <|-- SoldierSwordDecorator
+
+    class ProxySoldier <<Proxy>>
+    {
+        -soldier: Soldier
+        -hasShield: boolean
+        -hasSword: boolean
+        +ProxySoldier(s: Soldier)
+        +hit(): int
+        +wardOff(strength: int): boolean
+        +addShield(): void
+        +addSword(): void
+    }
+
+    Soldier <|-- ProxySoldier
+    ProxySoldier *-- Soldier
+}
+@enduml
+```
+
 ## Phần 2 - Tổ Chức Quân Đội
 
 ### 2.1. Composite Pattern
