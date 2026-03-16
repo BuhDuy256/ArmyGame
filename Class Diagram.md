@@ -211,7 +211,7 @@ package "Core" {
         +wardOff(strength: int): boolean
         +addShield(): void
         +addSword(): void
-        +toProxySoldier(s: soilder): ProxySoldier
+        -toProxySoldier(s: soilder): ProxySoldier
     }
 
     interface Soldier {
@@ -275,6 +275,124 @@ package "Core" {
 ```
 
 ### 2.2. Visitor Pattern
+
+```plantuml
+@startuml
+left to right direction
+
+package "Core" {
+    class SoldierGroup {
+        -soldiers: List<Soldier>
+        +addSoldier(s: Soldier): void
+        +removeSoldier(s: Soldier): void
+        +hit(): int
+        +wardOff(strength: int): boolean
+        +addShield(): void
+        +addSword(): void
+        +accept(v: SoldierVisitor): void
+        +getSoldiers(): List<Soldier>
+        -toProxySoldier(s: Soldier): ProxySoldier
+    }
+
+    interface Soldier {
+        +hit(): int
+        +wardOff(strength: int): boolean
+        +accept(v: SoldierVisitor): void
+    }
+
+    Soldier <|-- SoldierGroup
+    SoldierGroup *-- Soldier
+
+    interface SoldierVisitor {
+        +visit(g: SoldierGroup): void
+        +visit(i: Infantryman): void
+        +visit(h: Horseman): void
+        +visit(p: ProxySoldier): void
+    }
+
+    class DisplayVisitor <<ConcreteVisitor>> {
+        -entries: List<String>
+        +visit(g: SoldierGroup): void
+        +visit(i: Infantryman): void
+        +visit(h: Horseman): void
+        +visit(p: ProxySoldier): void
+        +printReport(): void
+    }
+
+    class CountVisitor <<ConcreteVisitor>> {
+        -infantryCount: int
+        -horsemanCount: int
+        +visit(g: SoldierGroup): void
+        +visit(i: Infantryman): void
+        +visit(h: Horseman): void
+        +visit(p: ProxySoldier): void
+        +printReport(): void
+    }
+
+    SoldierVisitor <|-- DisplayVisitor
+    SoldierVisitor <|-- CountVisitor
+
+    class Infantryman <<ConcreteComponent>>
+    class Horseman <<ConcreteComponent>>
+
+    Soldier <|-- Infantryman
+    Soldier <|-- Horseman
+
+    abstract class SoldierBaseDecorator <<Decorator>> {
+        -wrappee: Soldier
+        +SoldierBaseDecorator(s: Soldier)
+        +hit(): int
+        +wardOff(strength: int): boolean
+        +accept(v: SoldierVisitor): void
+        +getWrappee(): Soldier
+    }
+
+    Soldier <|-- SoldierBaseDecorator
+    SoldierBaseDecorator *-- Soldier
+
+    class SoldierShieldDecorator <<ConcreteDecorator>> {
+        -durability: int
+        +SoldierShieldDecorator(s: Soldier)
+        +hit(): int
+        +wardOff(strength: int): boolean
+    }
+
+    SoldierBaseDecorator <|-- SoldierShieldDecorator
+
+    class SoldierSwordDecorator <<ConcreteDecorator>> {
+        -durability: int
+        +SoldierSwordDecorator(s: Soldier)
+        +hit(): int
+        +wardOff(strength: int): boolean
+    }
+
+    SoldierBaseDecorator <|-- SoldierSwordDecorator
+
+    class ProxySoldier <<Proxy>>
+    {
+        -soldier: Soldier
+        -hasShield: boolean
+        -hasSword: boolean
+        +ProxySoldier(s: Soldier)
+        +hit(): int
+        +wardOff(strength: int): boolean
+        +accept(v: SoldierVisitor): void
+        +addShield(): void
+        +addSword(): void
+        +getSoldier(): Soldier
+        +hasShield(): boolean
+        +hasSword(): boolean
+    }
+
+    Soldier <|-- ProxySoldier
+    ProxySoldier *-- Soldier
+
+    Soldier ..> SoldierVisitor : accept(v)
+    DisplayVisitor ..> ProxySoldier
+    CountVisitor ..> ProxySoldier
+}
+@enduml
+```
 
 ## Phần 3 - Theo Dõi & Quản Lý Trận Chiến
 

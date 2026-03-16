@@ -14,22 +14,22 @@ public class Main {
         ProxySoldier alreadyProxy = new ProxySoldier(new Infantryman());
         rootGroup.addSoldier(alreadyProxy);
 
-        System.out.println("=== Before equipment ===");
+        System.out.println("Before equipment");
         System.out.println("Group hit = " + rootGroup.hit());
 
         rootGroup.addShield();
         rootGroup.addSword();
 
-        System.out.println("=== After equipment (shield + sword on whole group) ===");
+        System.out.println("After equipment (shield + sword on whole group)");
         System.out.println("Group hit = " + rootGroup.hit());
 
         int incomingDamage = 20;
         boolean groupAlive = rootGroup.wardOff(incomingDamage);
-        System.out.println("=== Defense test ===");
+        System.out.println("Defense test");
         System.out.println("Incoming damage = " + incomingDamage);
         System.out.println("Group alive after wardOff = " + groupAlive);
 
-        System.out.println("=== Durability test (multiple hits) ===");
+        System.out.println("Durability test (multiple hits)");
         for (int i = 1; i <= 12; i++) {
             System.out.println("Hit " + i + " -> " + rootGroup.hit());
         }
