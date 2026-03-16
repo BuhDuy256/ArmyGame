@@ -209,6 +209,9 @@ package "Core" {
         +removeSoldier(s: Soldier): void
         +hit(): int
         +wardOff(strength: int): boolean
+        +addShield(): void
+        +addSword(): void
+        +toProxySoldier(s: soilder): ProxySoldier
     }
 
     interface Soldier {
