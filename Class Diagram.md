@@ -398,6 +398,168 @@ package "Core" {
 
 ### 3.1. Observer Pattern
 
+```plantuml
+@startuml
+left to right direction
+
+package "Battle Tracking (3.1)" {
+
+    interface BattleObserver {
+        +onSoldierDied(s: Soldier): void
+    }
+
+    class BattleNotifier {
+        -observers: List<BattleObserver>
+        +addObserver(o: BattleObserver): void
+        +removeObserver(o: BattleObserver): void
+        +notifySoldierDied(s: Soldier): void
+    }
+
+    class DeathCountObserver <<ConcreteObserver>> {
+        -infantryDeaths: int
+        -horsemanDeaths: int
+        +onSoldierDied(s: Soldier): void
+        +printReport(): void
+        -unwrap(s: Soldier): Soldier
+    }
+
+    class DeathNotifierObserver <<ConcreteObserver>> {
+        -fallen: List<String>
+        +onSoldierDied(s: Soldier): void
+        +printReport(): void
+        -resolveName(s: Soldier): String
+        -sendCondolenceEmail(name: String): void
+    }
+
+    class SoldierGroup {
+        -soldiers: List<Soldier>
+        -notifier: BattleNotifier
+        +wardOff(strength: int): boolean
+    }
+
+    interface Soldier {
+        +hit(): int
+        +wardOff(strength: int): boolean
+        +accept(v: SoldierVisitor): void
+    }
+
+    BattleObserver <|-- DeathCountObserver
+    BattleObserver <|-- DeathNotifierObserver
+
+    BattleNotifier o-- BattleObserver
+    SoldierGroup --> BattleNotifier : uses in wardOff()
+    BattleNotifier ..> Soldier : death event payload
+}
+@enduml
+```
+
 ### 3.2. Singleton Pattern
 
+```plantuml
+@startuml
+left to right direction
+
+package "Observer Singleton (3.2)" {
+
+    interface BattleObserver {
+        +onSoldierDied(s: Soldier): void
+    }
+
+    class BattleNotifier {
+        -observers: List<BattleObserver>
+        +addObserver(o: BattleObserver): void
+        +removeObserver(o: BattleObserver): void
+        +notifySoldierDied(s: Soldier): void
+    }
+
+    class DeathCountObserver <<Singleton, ConcreteObserver>> {
+        -instance: DeathCountObserver {static}
+        -infantryDeaths: int
+        -horsemanDeaths: int
+        -DeathCountObserver()
+        +getInstance(): DeathCountObserver {static}
+        +onSoldierDied(s: Soldier): void
+        +printReport(): void
+    }
+
+    class DeathNotifierObserver <<Singleton, ConcreteObserver>> {
+        -instance: DeathNotifierObserver {static}
+        -fallen: List<String>
+        -DeathNotifierObserver()
+        +getInstance(): DeathNotifierObserver {static}
+        +onSoldierDied(s: Soldier): void
+        +printReport(): void
+    }
+
+    BattleObserver <|-- DeathCountObserver
+    BattleObserver <|-- DeathNotifierObserver
+    BattleNotifier o-- BattleObserver
+}
+@enduml
+```
+
+#### Giải thích tại sao việc giới hạn này lại có ý nghĩa trong bối cảnh theo dõi trận chiến.
+
+Singleton có ý nghĩa ở đây vì cả hai observer đều là **bộ tích lũy trạng thái**. Chúng không xử lý từng sự kiện rồi bỏ qua, mà cộng dồn dữ liệu suốt toàn bộ trận chiến. Nếu tồn tại nhiều instance, mỗi instance chỉ thấy một phần các sự kiện tùy theo nơi nó được đăng ký, dẫn đến báo cáo cuối trận bị sai hoặc mâu thuẫn.
+
+Ngoài ra, bản chất của trận chiến là một sự kiện duy nhất có điểm bắt đầu và kết thúc rõ ràng. Một trận chiến chỉ có một bảng thống kê thương vong thật sự, không phải nhiều bảng song song. Singleton phản ánh đúng thực tế đó vào thiết kế. Toàn bộ hệ thống dù gọi từ bất kỳ đâu cũng đều đọc và ghi vào cùng một nguồn dữ liệu, đảm bảo báo cáo cuối cùng phản ánh toàn bộ trận chiến từ đầu đến cuối.
+
 ### 3.3. Abstract Factory Pattern
+
+```plantuml
+@startuml
+left to right direction
+
+package "Era Factory (3.3)" {
+
+    interface EraFactory {
+        +createInfantryman(): EraInfantryman
+        +createHorseman(): EraHorseman
+    }
+
+    interface EraInfantryman {
+        +getWeapon(): String
+        +getArmor(): String
+        +describe(): void
+    }
+
+    interface EraHorseman {
+        +getWeapon(): String
+        +getArmor(): String
+        +describe(): void
+    }
+
+    class MedievalFactory
+    class WorldWarFactory
+    class SciFiFactory
+
+    EraFactory <|-- MedievalFactory
+    EraFactory <|-- WorldWarFactory
+    EraFactory <|-- SciFiFactory
+
+    class MedievalInfantryman
+    class MedievalHorseman
+    class WorldWarInfantryman
+    class WorldWarHorseman
+    class SciFiInfantryman
+    class SciFiHorseman
+
+    EraInfantryman <|-- MedievalInfantryman
+    EraInfantryman <|-- WorldWarInfantryman
+    EraInfantryman <|-- SciFiInfantryman
+
+    EraHorseman <|-- MedievalHorseman
+    EraHorseman <|-- WorldWarHorseman
+    EraHorseman <|-- SciFiHorseman
+
+    MedievalFactory --> MedievalInfantryman
+    MedievalFactory --> MedievalHorseman
+
+    WorldWarFactory --> WorldWarInfantryman
+    WorldWarFactory --> WorldWarHorseman
+
+    SciFiFactory --> SciFiInfantryman
+    SciFiFactory --> SciFiHorseman
+}
+@enduml
+```
